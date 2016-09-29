@@ -1,17 +1,4 @@
-from password_strength import get_password_strength, is_ascii
-
-all_ascii = "\
-`1234567890-=\
-qwertyuiop[]\\\
-asdfghjkl;'\
-zxcvbnm,./\
-~!@#$%^&*()_+\
-QWERTYUIOP{}|\
-ASDFGHJKL:\"\
-ZXCVBNM<>?\
-"
-
-assert is_ascii(all_ascii)
+from password_strength import get_password_strength
 
 # Testing with short passwords
 assert get_password_strength('12345')[0] == 1
