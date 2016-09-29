@@ -8,7 +8,7 @@ assert get_password_strength('12')[0] == 1
 assert get_password_strength('1')[0] == 1
 
 # Testing with weak passwords
-pass
+assert get_password_strength('987bearimiuhn98y8')[0] == 2
 
 # Testing with digits
 assert get_password_strength('272726654989')[0] == 3

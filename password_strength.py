@@ -1,5 +1,14 @@
 import re
-from nltk.corpus import words
+
+
+def divide_to_substrings(password) -> set:
+    substrings = {password}
+    for x in range(len(password)):
+        for y in range(len(password)):
+            temp = password[x:y]
+            if len(temp) > 2:
+                substrings.add(temp)
+    return substrings
 
 
 def is_common(password):
@@ -11,10 +20,11 @@ def is_common(password):
 
 
 def has_english_word(password):
-    for word in words.words():
-        if re.search(word, password):
-            return True
-    return False
+    from nltk.corpus import words
+    psswrd = password.lower()
+    english_vocab = set(word.lower() for word in words.words())
+    substrings = divide_to_substrings(psswrd)
+    return substrings.intersection(english_vocab)
 
 
 def has_modified_english_word(password):
@@ -124,6 +134,6 @@ def display(message):
 
 
 if __name__ == '__main__':
-    psswrd = input("Enter a password: ")
-    result = get_password_strength(psswrd)
+    example = input("Enter a password: ")
+    result = get_password_strength(example)
     display(result)
