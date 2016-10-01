@@ -93,49 +93,41 @@ def get_password_strength(password):
     assert is_ascii(password)
 
     if len(password) < 6:
-        return [1, "Your password's length should be more than 6."]
-
+        return 1, "Your password's length should be more than 6."
     if is_weak(password):
         return (2, "Your password is very weak.\n"
                    "Don't use:\n"
                    "- Simple passwords, like '1234567', 'password00', 'adm1n', etc.\n"
                    "- English words inside your passwords, even with replacing some characters with digits.\n"
                    "- Calendar dates or digit sequences like Pi or Fibonacci numbers.")
-
     if pass_bigger(5):
         if only_digits(password):
             return (3, "Your password consists only of 0-9 digits.\n"
                        "Add lowercase and uppercase latin letters and special symbols (~, @, #, etc.).")
-
         if only_lower(password):
             return (4, "Your password consists only of lowercase latin letters.\n"
                        "Add 0-9 digits, uppercase latin letters and special symbols (~, @, #, etc.).")
-
     if pass_bigger(9) and not has_special(password):
         if has_digits(password) and has_lower(password) and not has_upper(password):
-            return (5, "")
-
+            return (5, "Your password consists only of 0-9 digits and lowercase latin letters.\n"
+                       "Add uppercase latin letters and special symbols (~, @, #, etc.).")
         if not has_digits(password) and has_lower(password) and has_upper(password):
-            return (6, "")
-
+            return (6, "Your password consists only of lowercase and uppercase latin letters.\n"
+                       "Add 0-9 digits and special symbols (~, @, #, etc.).")
         if has_digits(password) and has_lower(password) and has_upper(password):
-            return (7, "")
-
-    if has_digits(password) or has_lower(password) or has_upper(password)\
-            and not pass_bigger(9) and not has_special(password):
+            return (7, "Your password consists only of 0-9 digits, lowercase and uppercase latin letters.\n"
+                       "Add special symbols (~, @, #, etc.).")
+    if (has_digits(password) or has_lower(password) or has_upper(password))\
+            and (not pass_bigger(9) and not has_special(password)):
         return (4, "Your password's length should be more than 9 to have bigger strength.\n"
                    "Also you should add special symbols (~, @, #, etc.).")
-
     if has_special(password) and has_digits(password) and has_lower(password) and has_upper(password):
-        if pass_bigger(12):
-            return (8, "")
-
-        elif pass_bigger(15):
-            return (9, "")
-
+        if pass_bigger(12) and not pass_bigger(15) and not pass_bigger(18):
+            return 8, "This is good password! Add more symbols to make it stronger."
+        elif pass_bigger(15) and not pass_bigger(18):
+            return 9, "This is great password! Add more symbols to make it stronger."
         elif pass_bigger(18):
-            return (10, "")
-
+            return 10, "This is awesome password! Add more symbols to make it stronger."
         else:
             return 7, "Your password's length should be more than 12 to have bigger strength."
 
@@ -147,7 +139,6 @@ def display(message):
 if __name__ == "__main__":
     while True:
         example = input("Enter a password: ")
-
         if example:
             result = get_password_strength(example)
             display(result)
