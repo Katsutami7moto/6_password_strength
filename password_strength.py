@@ -27,13 +27,24 @@ def has_english_word(password):
     return substrings.intersection(english_vocab)
 
 
-def has_leet(password):
-    """
-    Cheking all substrings of 3+ symbols for being an english word with some letters,
-    replaced by digits or divided by special symbols.
-    USE RE.SEARCH !!!
-    """
-    pass
+def simple_leet_decoding(password):
+    leet = {
+        '0': 'o',
+        '1': 'i',
+        '2': 'z',
+        '3': 'e',
+        '4': 'a',
+        '5': 's',
+        '6': 'g',
+        '7': 't',
+        '8': 'b',
+        '9': 'q'
+    }
+    lookup = password.split()
+    for index, letter in enumerate(lookup):
+        if letter in leet:
+            lookup[index] = leet[letter]
+    return "".join(lookup)
 
 
 def has_sequences(password):
@@ -64,8 +75,8 @@ def has_repeates(password):
 
 
 def is_weak(password):
-    return is_blacklisted(password) or has_english_word(password) or has_leet(password) \
-           or has_sequences(password) or has_dates(password) or has_repeates(password)
+    return is_blacklisted(password) or has_english_word(password) or has_sequences(password)\
+           or has_dates(password) or has_repeates(password)
 
 
 def only_digits(password):
@@ -104,7 +115,7 @@ def get_password_strength(password):
 
     if len(password) < 6:
         return 1, "Your password's length should be more than 6."
-    if is_weak(password):
+    if is_weak(password) or is_weak(simple_leet_decoding(password)):
         return (2, "Your password is very weak.\n"
                    "Don't use:\n"
                    "- Simple passwords, like '1234567', 'password00', 'adm1n', etc.\n"

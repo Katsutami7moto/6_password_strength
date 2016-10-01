@@ -12,7 +12,7 @@ assert get_password_strength('987bearuhn98y8')[0] == 2
 assert get_password_strength('youaremynumberoneassisstantforever')[0] == 2
 # assert get_password_strength('Password1')[0] == 2
 # assert get_password_strength('adminadmin')[0] == 2
-# assert get_password_strength('qw3r7yu10p')[0] == 2
+# assert get_password_strength('9w3r7yu10p')[0] == 2
 # assert get_password_strength('jkjghg12121999,;].;')[0] == 2
 # assert get_password_strength('d;Fs28/11/56]-g54')[0] == 2
 
