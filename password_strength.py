@@ -27,7 +27,7 @@ def has_english_word(password):
     return substrings.intersection(english_vocab)
 
 
-def has_modified_english_word(password):
+def has_leet(password):
     """
     Cheking all substrings of 3+ symbols for being an english word with some letters,
     replaced by digits or divided by special symbols.
@@ -36,9 +36,10 @@ def has_modified_english_word(password):
     pass
 
 
-def has_famous_digit_sequence(password):
+def has_sequences(password):
     """
-    Cheking all substrings of 3+ symbols for being a digit sequence, e.g. Pi, Fibonacci, factorials.
+    Cheking all substrings of 3+ symbols for being a digit sequence, e.g. Pi, Fibonacci, factorials;
+    or a letter sequence, e.g. 'abcdefg', 'zyxwvut', etc.
     USE RE.SEARCH !!!
     """
     pass
@@ -53,9 +54,18 @@ def has_dates(password):
     pass
 
 
+def has_repeates(password):
+    """
+    Cheking all substrings of 3+ symbols for being repeats of one symbol, e.g.
+    'aaa', '777', '{{{', etc.
+    USE RE.SEARCH !!!
+    """
+    pass
+
+
 def is_weak(password):
-    return is_blacklisted(password) or has_english_word(password) or has_modified_english_word(password) \
-           or has_famous_digit_sequence(password) or has_dates(password)
+    return is_blacklisted(password) or has_english_word(password) or has_leet(password) \
+           or has_sequences(password) or has_dates(password) or has_repeates(password)
 
 
 def only_digits(password):
@@ -132,7 +142,7 @@ def get_password_strength(password):
             return 7, "Your password's length should be more than 12 to have bigger strength."
 
 
-def display(message):
+def display(message: tuple):
     print("Password's strength: {0} out of 10.\n{1}\n".format(*message))
 
 
