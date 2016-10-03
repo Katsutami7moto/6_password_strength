@@ -1,29 +1,28 @@
 import re
 
 
-def divide_to_substrings(password) -> set:
+def divide_to_substrings(password, minimum) -> set:
     substrings = {password}
     for x in range(len(password)):
         for y in range(len(password)):
             temp = password[x:y]
-            if len(temp) > 2:
+            if len(temp) > (minimum - 1):
                 substrings.add(temp)
     return substrings
 
 
 def is_blacklisted(password):
-    """
-    Cheking all substrings of 3+ symbols for being a password in the blacklist.
-    USE RE.SEARCH !!!
-    """
-    pass
+    with open('10_million_password_list_top_1000000.txt', encoding='utf-8') as handle:
+        blacklist = filter(lambda x: len(x) > 3, set(handle))
+        substrings = divide_to_substrings(password, 4)
+        return substrings.intersection(blacklist)
 
 
 def has_english_word(password):
     from nltk.corpus import words
     psswrd = password.lower()
-    english_vocab = filter(lambda x: len(x) > 2, set(word.lower() for word in words.words()))
-    substrings = divide_to_substrings(psswrd)
+    english_vocab = filter(lambda x: len(x) > 3, set(word.lower() for word in words.words()))
+    substrings = divide_to_substrings(psswrd, 4)
     return substrings.intersection(english_vocab)
 
 
@@ -40,55 +39,27 @@ def simple_leet_decoding(password):
         '8': 'b',
         '9': 'q'
     }
-    lookup = password.split()
+    lookup = list(password)
     for index, letter in enumerate(lookup):
         if letter in leet:
             lookup[index] = leet[letter]
     return "".join(lookup)
 
 
-def has_sequences(password):
-    """
-    Cheking all substrings of 3+ symbols for being a digit sequence, e.g. Pi, Fibonacci, factorials;
-    or a letter sequence, e.g. 'abcdefg', 'zyxwvut', etc.
-    USE RE.SEARCH !!!
-    """
-    pass
-
-
 def has_dates(password):
-    """
-    Cheking all substrings of 3+ symbols for being a calendar date in any format, e.g.
-    131298, 12.28.78, 15/01/2014, etc.
-    USE RE.SEARCH !!!
-    """
-    pass
+    return re.search(r"(\d\d\.\d\d\.\d\d(\d\d)?)|(\d\d/\d\d/\d\d(\d\d)?)", password)
 
 
 def has_repeates(password):
-    """
-    Cheking all substrings of 3+ symbols for being repeats of one symbol, e.g.
-    'aaa', '777', '{{{', etc.
-    USE RE.SEARCH !!!
-    """
-    pass
+    return re.search(r"(.)\1\1+", password) or re.search(r"(...+)\1+", password)
 
 
 def is_weak(password):
-    return is_blacklisted(password) or has_english_word(password) or has_sequences(password) \
-           or has_dates(password) or has_repeates(password)
+    return is_blacklisted(password) or has_english_word(password) or has_dates(password) or has_repeates(password)
 
 
 def is_ascii(password):
     return re.fullmatch(r"[a-zA-Z0-9_`~!@#$%\^&*()\-+=/{\}\[\]\\|;':\",.<>?]+", password)
-
-
-def only_digits(password):
-    return re.fullmatch(r"[0-9]+", password)
-
-
-def only_lower(password):
-    return re.fullmatch(r"[a-z]+", password)
 
 
 def has_special(password):
@@ -110,8 +81,8 @@ def has_upper(password):
 def get_password_strength(password) -> list:
     assert is_ascii(password)
     conditions = (
-        only_digits(password),
-        only_lower(password),
+        password.isdigit(),
+        has_lower(password) and not has_digits(password) and not has_upper(password) and not has_special(password),
         has_lower(password),
         has_digits(password),
         has_upper(password),
@@ -142,25 +113,21 @@ def get_password_strength(password) -> list:
         return bits_for_symbol * len(password)
 
     def count_entropy_bonus(bits):
-        bonus = (bits - 40) // 20
+        bonus = (bits - 20) // 20
         if bonus < 0:
             return 0
         else:
             return bonus
 
-    if is_weak(password) or is_weak(simple_leet_decoding(password)):
-        score = 0
+    if is_weak(password) or is_weak(simple_leet_decoding(password)) or conditions[0]:
+        score = 1
         text = ["Your password is very weak.\n",
                 "Don't use:\n",
+                "- Only digits: add other types of characters.\n",
                 "- Simple passwords, like '1234567', 'password00', 'adm1n', etc.\n",
                 "- English words inside your passwords, even with replacing some characters with digits.\n",
-                "- Letter sequences like 'abcdef', 'qwertyuiop', etc.\n",
                 "- Calendar dates like '131298', '12.28.78', '15/01/2014', etc.\n",
-                "- Digit sequences like Pi or Fibonacci numbers.\n"]
-    elif conditions[0]:
-        score = 1
-        text = ["Your password consists only of 0-9 digits.\n",
-                "Add lowercase and uppercase latin letters and special symbols (~, @, #, etc.).\n"]
+                "- Any kinds of repeates: 'aaa', 'a1A~a1A~', etc.\n"]
     elif conditions[1]:
         score = 2
         text = ["Your password consists only of lowercase latin letters.\n",
@@ -185,13 +152,13 @@ def get_password_strength(password) -> list:
                     "Add special symbols (~, @, #, etc.).\n"]
         elif conditions[9]:
             text = ["This is good password! :)\n"]
-        if score > 10:
+        if score >= 10:
             score = 10
             text = ["Awesome password!\n",
                     "You don't need to do anything with it :)\n"]
         else:
             text.append("You may add more symbols to your password to make it stronger.\n")
-    return score, "".join(text)
+    return int(score), "".join(text)
 
 
 def display(message: list):
