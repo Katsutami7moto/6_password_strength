@@ -1,7 +1,7 @@
 import re
 
 
-def divide_to_substrings(password, minimum) -> set:
+def divide_to_substrings(password: str, minimum: int) -> set:
     substrings = {password}
     for x in range(len(password)):
         for y in range(len(password)):
@@ -11,22 +11,22 @@ def divide_to_substrings(password, minimum) -> set:
     return substrings
 
 
-def is_blacklisted(password):  # FIXME: automate the download of blacklist!
-    with open('10_million_password_list_top_1000000.txt', encoding='utf-8') as handle:
-        blacklist = filter(lambda x: len(x) > 3, set(handle))
+def check_in_list(password: str, filepath: str) -> set:
+    with open(filepath, encoding='utf-8', newline='\n') as handle:
+        blacklist = set(map(lambda x: x[:-1], filter(lambda x: len(x) > 3, handle)))
         substrings = divide_to_substrings(password, 4)
         return substrings.intersection(blacklist)
 
 
-def has_english_word(password):  # FIXME: don't use nltk!
-    from nltk.corpus import words
-    psswrd = password.lower()
-    english_vocab = filter(lambda x: len(x) > 3, set(word.lower() for word in words.words()))
-    substrings = divide_to_substrings(psswrd, 4)
-    return substrings.intersection(english_vocab)
+def check_black_or_english(password: str) -> bool:
+    check_black = check_in_list(password, 'blacklist_1kk.txt')
+    check_black_leet = check_in_list(simple_leet_decoding(password), 'blacklist_1kk.txt')
+    check_eng = check_in_list(password.lower(), 'english.txt')
+    check_eng_leet = check_in_list(simple_leet_decoding(password.lower()), 'english.txt')
+    return check_black or check_eng or check_black_leet or check_eng_leet
 
 
-def simple_leet_decoding(password):
+def simple_leet_decoding(password: str) -> str:
     leet = {
         '0': 'o',
         '1': 'i',
@@ -46,39 +46,39 @@ def simple_leet_decoding(password):
     return "".join(lookup)
 
 
-def has_dates(password):
+def has_dates(password: str) -> bool:
     return re.search(r"(\d\d\.\d\d\.\d\d(\d\d)?)|(\d\d/\d\d/\d\d(\d\d)?)", password)
 
 
-def has_repeates(password):
+def has_repeates(password: str) -> bool:
     return re.search(r"(.)\1\1+", password) or re.search(r"(...+)\1+", password)
 
 
-def is_weak(password):
-    return is_blacklisted(password) or has_english_word(password) or has_dates(password) or has_repeates(password)
+def is_weak(password: str) -> bool:
+    return check_black_or_english(password) or has_dates(password) or has_repeates(password)
 
 
-def is_ascii(password):
+def is_ascii(password: str) -> bool:
     return re.fullmatch(r"[a-zA-Z0-9_`~!@#$%\^&*()\-+=/{\}\[\]\\|;':\",.<>?]+", password)
 
 
-def has_special(password):
+def has_special(password: str) -> bool:
     return re.search(r"[_`~!@#$%\^&*()\-+=/{\}\[\]\\|;':\",.<>?]", password)
 
 
-def has_digits(password):
+def has_digits(password: str) -> bool:
     return re.search(r"[0-9]", password)
 
 
-def has_lower(password):
+def has_lower(password: str) -> bool:
     return re.search(r"[a-z]", password)
 
 
-def has_upper(password):
+def has_upper(password: str) -> bool:
     return re.search(r"[A-Z]", password)
 
 
-def get_password_strength(password) -> list:
+def get_password_strength(password: str) -> list:
     assert is_ascii(password)
     conditions = (
         password.isdigit(),
@@ -95,7 +95,7 @@ def get_password_strength(password) -> list:
     score = 0
     text = []
 
-    def count_entropy_bits():
+    def count_entropy_bits() -> float:
         bits_for_symbol = 0
         if conditions[0]:
             bits_for_symbol = 3.3219
@@ -112,14 +112,14 @@ def get_password_strength(password) -> list:
                 bits_for_symbol = 6.5699
         return bits_for_symbol * len(password)
 
-    def count_entropy_bonus(bits):
+    def count_entropy_bonus(bits: float) -> int:
         bonus = (bits - 20) // 20
         if bonus < 0:
             return 0
         else:
             return bonus
 
-    if is_weak(password) or is_weak(simple_leet_decoding(password)) or conditions[0]:
+    if is_weak(password) or conditions[0]:
         score = 1
         text = ["Your password is very weak.\n",
                 "Don't use:\n",
@@ -161,7 +161,7 @@ def get_password_strength(password) -> list:
     return int(score), "".join(text)
 
 
-def display(message: list):
+def display(message: list) -> bool:
     print("Password's strength: {0} out of 10.\n{1}\n".format(*message))
 
 
