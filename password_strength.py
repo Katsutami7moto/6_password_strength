@@ -78,7 +78,7 @@ def has_upper(password: str) -> bool:
     return re.search(r"[A-Z]", password)
 
 
-def get_password_strength(password: str) -> list:
+def get_password_strength(password: str) -> tuple:
     assert is_ascii(password)
     conditions = (
         password.isdigit(),
@@ -161,7 +161,7 @@ def get_password_strength(password: str) -> list:
     return int(score), "".join(text)
 
 
-def display(message: list) -> bool:
+def display(message: tuple) -> bool:
     print("Password's strength: {0} out of 10.\n{1}\n".format(*message))
 
 
