@@ -11,14 +11,14 @@ def divide_to_substrings(password, minimum) -> set:
     return substrings
 
 
-def is_blacklisted(password):
+def is_blacklisted(password):  # FIXME: automate the download of blacklist!
     with open('10_million_password_list_top_1000000.txt', encoding='utf-8') as handle:
         blacklist = filter(lambda x: len(x) > 3, set(handle))
         substrings = divide_to_substrings(password, 4)
         return substrings.intersection(blacklist)
 
 
-def has_english_word(password):
+def has_english_word(password):  # FIXME: don't use nltk!
     from nltk.corpus import words
     psswrd = password.lower()
     english_vocab = filter(lambda x: len(x) > 3, set(word.lower() for word in words.words()))
