@@ -96,6 +96,10 @@ def get_password_strength(password: str) -> tuple:
     text = []
 
     def count_entropy_bits() -> float:
+        """
+        Source of entropy constants:
+        https://en.wikipedia.org/wiki/Password_strength#Random_passwords
+        """
         bits_for_symbol = 0
         if conditions[0]:
             bits_for_symbol = 3.3219
@@ -109,7 +113,7 @@ def get_password_strength(password: str) -> tuple:
             elif conditions[8]:
                 bits_for_symbol = 5.9542
             elif conditions[9]:
-                bits_for_symbol = 6.5699
+                bits_for_symbol = 6.5549
         return bits_for_symbol * len(password)
 
     def count_entropy_bonus(bits: float) -> int:
