@@ -19,8 +19,8 @@ assert get_password_strength('gtnshd')[0] == 2
 assert get_password_strength('jgfjfdkfdfj')[0] == 2
 
 # Testing with lowercase and digits
-assert get_password_strength('f46vbt57tvi3nh4bh')[0] >= 3
-assert get_password_strength('h3k4u5g1k9i')[0] >= 3
+assert get_password_strength('zlr82f6ds98')[0] >= 3
+assert get_password_strength('h2k6b7g8k9w')[0] >= 3
 
 # Testing with lowercase and uppercase
 assert get_password_strength('gHssDTVjTHffgf')[0] >= 3

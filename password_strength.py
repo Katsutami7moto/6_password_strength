@@ -1,21 +1,13 @@
 import re
 
 
-def divide_to_substrings(password: str, minimum: int) -> set:
-    substrings = {password}
-    for x in range(len(password)):
-        for y in range(len(password)):
-            temp = password[x:y]
-            if len(temp) > (minimum - 1):
-                substrings.add(temp)
-    return substrings
-
-
-def check_in_list(password: str, filepath: str) -> set:
+def check_in_list(password: str, filepath: str) -> bool:
     with open(filepath, encoding='utf-8', newline='\n') as handle:
-        blacklist = set(map(lambda x: x[:-1], filter(lambda x: len(x) > 3, handle)))
-        substrings = divide_to_substrings(password, 4)
-        return substrings.intersection(blacklist)
+        blacklist = set(map(lambda x: x[:-1], filter(lambda x: len(x) > 4, handle)))
+        for bad_password in blacklist:
+            if bad_password in password:
+                return True
+        return False
 
 
 def check_black_or_english(password: str) -> bool:
@@ -102,18 +94,18 @@ def get_password_strength(password: str) -> tuple:
         """
         bits_for_symbol = 0
         if conditions[0]:
-            bits_for_symbol = 3.3219
+            bits_for_symbol = 3.922
         elif conditions[1]:
-            bits_for_symbol = 4.7004
+            bits_for_symbol = 4.700
         elif conditions[2]:
             if conditions[6]:
-                bits_for_symbol = 5.1699
+                bits_for_symbol = 5.170
             elif conditions[7]:
-                bits_for_symbol = 5.7004
+                bits_for_symbol = 5.700
             elif conditions[8]:
-                bits_for_symbol = 5.9542
+                bits_for_symbol = 5.954
             elif conditions[9]:
-                bits_for_symbol = 6.5549
+                bits_for_symbol = 6.555
         return bits_for_symbol * len(password)
 
     def count_entropy_bonus(bits: float) -> int:
