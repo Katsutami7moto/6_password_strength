@@ -47,7 +47,7 @@ def simple_leet_decoding(password: str) -> str:
 
 
 def has_dates(password: str) -> bool:
-    return re.search(r"(\d\d\.\d\d\.\d\d(\d\d)?)|(\d\d/\d\d/\d\d(\d\d)?)", password)
+    return re.search(r"(\d{2}(\d{2})?(\.|/)?){3}", password)
 
 
 def has_repeates(password: str) -> bool:
