@@ -70,6 +70,14 @@ def has_upper(password: str) -> bool:
     return re.search(r"[A-Z]", password)
 
 
+def count_entropy_bonus(bits: float) -> int:
+    bonus = (bits - 20) // 20
+    if bonus < 0:
+        return 0
+    else:
+        return bonus
+
+
 def get_password_strength(password: str) -> tuple:
     assert is_ascii(password)
     conditions = (
@@ -107,13 +115,6 @@ def get_password_strength(password: str) -> tuple:
             elif conditions[9]:
                 bits_for_symbol = 6.555
         return bits_for_symbol * len(password)
-
-    def count_entropy_bonus(bits: float) -> int:
-        bonus = (bits - 20) // 20
-        if bonus < 0:
-            return 0
-        else:
-            return bonus
 
     if is_weak(password) or conditions[0]:
         score = 1
