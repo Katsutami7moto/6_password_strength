@@ -13,10 +13,14 @@ assert get_password_strength('272726654989')[0] == 1
 assert get_password_strength('789456')[0] == 1
 assert get_password_strength('000000000')[0] == 1
 
-# Testing with lowercase
+# Testing with only lowercase/uppercase
 assert get_password_strength('fjhkhjgvbsrcnvjsknkbjhsvbk')[0] == 2
 assert get_password_strength('gtnshd')[0] == 2
 assert get_password_strength('jgfjfdkfdfj')[0] == 2
+
+assert get_password_strength('FJHKHJGVBSRCNVJSKNKBJHSVBK')[0] == 2
+assert get_password_strength('GTNSHD')[0] == 2
+assert get_password_strength('JGFJFDKFDFJ')[0] == 2
 
 # Testing with lowercase and digits
 assert get_password_strength('zlr82f6ds98')[0] >= 3

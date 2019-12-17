@@ -2,7 +2,7 @@ import re
 
 
 def check_in_list(password: str, filepath: str) -> bool:
-    with open(filepath, encoding='utf-8', newline='\n') as handle:
+    with open(filepath, encoding='utf-8') as handle:
         blacklist = set(map(lambda x: x[:-1], filter(lambda x: len(x) > 4, handle)))
         for bad_password in blacklist:
             if bad_password in password:
@@ -38,35 +38,35 @@ def simple_leet_decoding(password: str) -> str:
     return "".join(lookup)
 
 
-def has_dates(password: str) -> bool:
-    return re.search(r"(\d{2}(\d{2})?(\.|/)?){3}", password)
+def has_dates(password: str):
+    return re.search(r"(\d{2}(\d{2})?([./])?){3}", password)
 
 
-def has_repeates(password: str) -> bool:
+def has_repeates(password: str):
     return re.search(r"(.)\1\1+", password) or re.search(r"(...+)\1+", password)
 
 
-def is_weak(password: str) -> bool:
+def is_weak(password: str):
     return check_black_or_english(password) or has_dates(password) or has_repeates(password)
 
 
-def is_ascii(password: str) -> bool:
-    return re.fullmatch(r"[a-zA-Z0-9_`~!@#$%\^&*()\-+=/{\}\[\]\\|;':\",.<>?]+", password)
+def is_ascii(password: str):
+    return re.fullmatch(r"[a-zA-Z0-9_`~!@#$%^&*()\-+=/{\}\[\]\\|;':\",.<>?]+", password)
 
 
-def has_special(password: str) -> bool:
-    return re.search(r"[_`~!@#$%\^&*()\-+=/{\}\[\]\\|;':\",.<>?]", password)
+def has_special(password: str):
+    return re.search(r"[_`~!@#$%^&*()\-+=/{\}\[\]\\|;':\",.<>?]", password)
 
 
-def has_digits(password: str) -> bool:
+def has_digits(password: str):
     return re.search(r"[0-9]", password)
 
 
-def has_lower(password: str) -> bool:
+def has_lower(password: str):
     return re.search(r"[a-z]", password)
 
 
-def has_upper(password: str) -> bool:
+def has_upper(password: str):
     return re.search(r"[A-Z]", password)
 
 
@@ -75,7 +75,7 @@ def count_entropy_bonus(bits: float) -> int:
     if bonus < 0:
         return 0
     else:
-        return bonus
+        return int(bonus)
 
 
 def get_password_strength(password: str) -> tuple:
@@ -90,7 +90,8 @@ def get_password_strength(password: str) -> tuple:
         has_digits(password) and not has_upper(password) and not has_special(password),
         not has_digits(password) and has_upper(password) and not has_special(password),
         has_digits(password) and has_upper(password) and not has_special(password),
-        has_digits(password) and has_upper(password) and has_special(password)
+        has_digits(password) and has_upper(password) and has_special(password),
+        has_upper(password) and not has_lower(password) and not has_digits(password) and not has_special(password)
     )
     score = 0
     text = []
@@ -101,19 +102,14 @@ def get_password_strength(password: str) -> tuple:
         https://en.wikipedia.org/wiki/Password_strength#Random_passwords
         """
         bits_for_symbol = 0
-        if conditions[0]:
-            bits_for_symbol = 3.922
-        elif conditions[1]:
-            bits_for_symbol = 4.700
-        elif conditions[2]:
-            if conditions[6]:
-                bits_for_symbol = 5.170
-            elif conditions[7]:
-                bits_for_symbol = 5.700
-            elif conditions[8]:
-                bits_for_symbol = 5.954
-            elif conditions[9]:
-                bits_for_symbol = 6.555
+        if conditions[6]:
+            bits_for_symbol = 5.170
+        elif conditions[7]:
+            bits_for_symbol = 5.700
+        elif conditions[8]:
+            bits_for_symbol = 5.954
+        elif conditions[9]:
+            bits_for_symbol = 6.555
         return bits_for_symbol * len(password)
 
     if is_weak(password) or conditions[0]:
@@ -122,13 +118,13 @@ def get_password_strength(password: str) -> tuple:
                 "Don't use:\n",
                 "- Only digits: add other types of characters.\n",
                 "- Simple passwords, like '1234567', 'password00', 'adm1n', etc.\n",
-                "- English words inside your passwords, even with replacing some characters with digits.\n",
+                "- English words inside your passwords, even with replacing some characters with similar digits.\n",
                 "- Calendar dates like '131298', '12.28.78', '15/01/2014', etc.\n",
                 "- Any kinds of repeates: 'aaa', 'a1A~a1A~', etc.\n"]
-    elif conditions[1]:
+    elif conditions[1] or conditions[10]:
         score = 2
-        text = ["Your password consists only of lowercase latin letters.\n",
-                "Add 0-9 digits, uppercase latin letters and special symbols (~, @, #, etc.).\n"]
+        text = ["Your password consists only of lowercase or uppercase latin letters.\n",
+                "Add 0-9 digits, uppercase or lowercase latin letters and special symbols (~, @, #, etc.).\n"]
     elif conditions[2]:
         score = 2
         if conditions[3]:
@@ -148,7 +144,7 @@ def get_password_strength(password: str) -> tuple:
             text = ["Your password consists only of 0-9 digits, lowercase and uppercase latin letters.\n",
                     "Add special symbols (~, @, #, etc.).\n"]
         elif conditions[9]:
-            text = ["This is good password! :)\n"]
+            text = ["This is a good password! :)\n"]
         if score >= 10:
             score = 10
             text = ["Awesome password!\n",
@@ -158,7 +154,7 @@ def get_password_strength(password: str) -> tuple:
     return int(score), "".join(text)
 
 
-def display(message: tuple) -> bool:
+def display(message: tuple):
     print("Password's strength: {0} out of 10.\n{1}\n".format(*message))
 
 
