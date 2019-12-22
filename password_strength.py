@@ -1,20 +1,28 @@
 import re
+import string
+
+blacklist_1kk = {}
+english_words_list = {}
 
 
-def check_in_list(password: str, filepath: str) -> bool:
+def create_blacklist(filepath: str) -> set:
     with open(filepath, encoding='utf-8') as handle:
-        blacklist = set(map(lambda x: x[:-1], filter(lambda x: len(x) > 4, handle)))
-        for bad_password in blacklist:
-            if bad_password in password:
-                return True
-        return False
+        blacklist = map(lambda x: re.sub('[^{}]'.format(string.ascii_letters), '', x[:-1].lower()), handle)
+        return set(filter(lambda x: len(x) > 2 and re.search('[aeuioy]', x), blacklist))
+
+
+def check_in_list(password: str, blacklist: set) -> bool:
+    for bad_password in blacklist:
+        if bad_password in password:
+            return True
+    return False
 
 
 def check_black_or_english(password: str) -> bool:
-    check_black = check_in_list(password, 'blacklist_1kk.txt')
-    check_black_leet = check_in_list(simple_leet_decoding(password), 'blacklist_1kk.txt')
-    check_eng = check_in_list(password.lower(), 'english.txt')
-    check_eng_leet = check_in_list(simple_leet_decoding(password.lower()), 'english.txt')
+    check_black = check_in_list(password, blacklist_1kk)
+    check_black_leet = check_in_list(simple_leet_decoding(password), blacklist_1kk)
+    check_eng = check_in_list(password.lower(), english_words_list)
+    check_eng_leet = check_in_list(simple_leet_decoding(password.lower()), english_words_list)
     return check_black or check_eng or check_black_leet or check_eng_leet
 
 
@@ -119,6 +127,8 @@ def get_password_strength(password: str) -> tuple:
                 "- Only digits: add other types of characters.\n",
                 "- Simple passwords, like '1234567', 'password00', 'adm1n', etc.\n",
                 "- English words inside your passwords, even with replacing some characters with similar digits.\n",
+                "- Vowels (a, e, i, o, u, y) and digits (0, 1, 3, 4) ",
+                "to avoid taking a random combination of letters for a word.\n",
                 "- Calendar dates like '131298', '12.28.78', '15/01/2014', etc.\n",
                 "- Any kinds of repeates: 'aaa', 'a1A~a1A~', etc.\n"]
     elif conditions[1] or conditions[10]:
@@ -158,15 +168,66 @@ def display(message: tuple):
     print("Password's strength: {0} out of 10.\n{1}\n".format(*message))
 
 
+def unit_tests():
+    # Testing weak passwords
+    assert get_password_strength('987bearuhn98y8')[0] == 1
+    assert get_password_strength('youaremynumberoneassisstantforever')[0] == 1
+    assert get_password_strength('Password1')[0] == 1
+    assert get_password_strength('adminadmin')[0] == 1
+    assert get_password_strength('9w3r7yu10p')[0] == 1
+    assert get_password_strength('jkjghg12121999,;].;')[0] == 1
+    assert get_password_strength('d;Fs28/11/56]-g54')[0] == 1
+    assert get_password_strength('272726654989')[0] == 1
+    assert get_password_strength('789456')[0] == 1
+    assert get_password_strength('000000000')[0] == 1
+
+    # Testing with only lowercase/uppercase
+    assert get_password_strength('fjhkhjgvbsrcnvjsknkbjhsvbk')[0] == 2
+    assert get_password_strength('jgfjfdkfdfj')[0] == 2
+
+    assert get_password_strength('FJHKHJGVBSRCNVJSKNKBJHSVBK')[0] == 2
+    assert get_password_strength('JGFJFDKFDFJ')[0] == 2
+
+    # Testing with lowercase and digits
+    assert get_password_strength('zlr82f6ds98')[0] >= 3
+    assert get_password_strength('h2k6b7g8k9w')[0] >= 3
+
+    # Testing with lowercase and uppercase
+    assert get_password_strength('gHssDTVjTHffgf')[0] >= 3
+    assert get_password_strength('hGrRlDwNmHq')[0] >= 3
+
+    # Testing with lowercase, uppercase and digits
+    assert get_password_strength('sjd5G6H3FHJ8Hh6jgs')[0] >= 4
+    assert get_password_strength('h7BtR9qJ8B6')[0] >= 4
+    assert get_password_strength('bvsbvrjsbS7')[0] >= 4
+
+    # Testing with all printable
+    assert get_password_strength('s8H~1wG@g8P+o')[0] >= 5
+    assert get_password_strength('65><:[hg_fd=TJ')[0] >= 5
+
+    assert get_password_strength('s8H~1wE@i8U+o{}:><')[0] >= 5
+    assert get_password_strength('i8U+o{}:><86tgGFH')[0] >= 5
+
+    assert get_password_strength('a;L8}0qJ^6Bxr#G5@zjL7')[0] >= 5
+    assert get_password_strength('|?/756jfVHHBH$5wb7$%#%QHB%$CT%J')[0] >= 5
+
+
 if __name__ == "__main__":
+    blacklist_1kk = create_blacklist('blacklist_1kk.txt')
+    english_words_list = create_blacklist('english.txt')
     while True:
         example = input("Enter a password: ")
         if example:
-            try:
-                result = get_password_strength(example)
-                display(result)
-            except AssertionError:
-                print("Your password should contain only ASCII printable characters (except whitespace).")
+            if example == 'test':
+                unit_tests()
+                print('Test completed successfully!')
                 continue
+            else:
+                try:
+                    result = get_password_strength(example)
+                    display(result)
+                except AssertionError:
+                    print("Your password should contain only ASCII printable characters (except whitespace).")
+                    continue
         else:
             break
